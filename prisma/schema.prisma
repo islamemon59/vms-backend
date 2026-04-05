@@ -1,0 +1,54 @@
+generator client {
+  provider = "prisma-client"
+  output   = "../generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+model User {
+  id        String   @id @default(uuid())
+  name      String
+  email     String   @unique
+  password  String
+  role      String   @default("user")
+  createdAt DateTime @default(now())
+}
+
+model Volunteer {
+  id        String   @id @default(uuid())
+  name      String
+  email     String   @unique
+  phone     String
+  address   String
+  skills    String
+  createdAt DateTime @default(now())
+
+  participations Participation[]
+}
+
+model Event {
+  id            String   @id @default(uuid())
+  title         String
+  description   String
+  location      String
+  date          DateTime
+  maxVolunteers Int
+  createdAt     DateTime @default(now())
+
+  participations Participation[]
+}
+
+model Participation {
+  id          String   @id @default(uuid())
+  volunteerId String
+  eventId     String
+  status      String   @default("registered")
+  createdAt   DateTime @default(now())
+
+  volunteer Volunteer @relation(fields: [volunteerId], references: [id], onDelete: Cascade)
+  event     Event     @relation(fields: [eventId], references: [id], onDelete: Cascade)
+
+  @@unique([volunteerId, eventId])
+}

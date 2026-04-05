@@ -8,7 +8,7 @@ const JWT_EXPIRES_IN = "7d";
 
 export const signup = async (req: Request, res: Response): Promise<void> => {
   try {
-    const { name, email, password, role } = req.body;
+    const { name, email, password } = req.body;
     if (!name || !email || !password) {
       res.status(400).json({ error: "Name, email, and password are required" });
       return;
@@ -27,7 +27,7 @@ export const signup = async (req: Request, res: Response): Promise<void> => {
         name,
         email,
         password: hashedPassword,
-        role: role === "admin" ? "admin" : "user",
+        role: "user",
       },
     });
 
@@ -91,13 +91,29 @@ export const getMe = async (req: Request, res: Response): Promise<void> => {
       return;
     }
 
-    const user = await prisma.user.findUnique({ where: { id: userId } });
+    const user = await prisma.user.findUnique({
+      where: { id: userId },
+      include: {
+        volunteerRequests: {
+          orderBy: { createdAt: "desc" },
+          take: 1,
+        },
+      },
+    });
     if (!user) {
       res.status(404).json({ error: "User not found" });
       return;
     }
 
-    res.json({ id: user.id, name: user.name, email: user.email, role: user.role });
+    const latestRequest = user.volunteerRequests[0] || null;
+
+    res.json({
+      id: user.id,
+      name: user.name,
+      email: user.email,
+      role: user.role,
+      volunteerRequestStatus: latestRequest?.status || null,
+    });
   } catch (error) {
     console.error("Error fetching user:", error);
     res.status(500).json({ error: "Failed to fetch user" });

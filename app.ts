@@ -5,6 +5,7 @@ import authRoutes from "./routes/auth.routes.js";
 import volunteerRoutes from "./routes/volunteer.routes.js";
 import eventRoutes from "./routes/event.routes.js";
 import participationRoutes from "./routes/participation.routes.js";
+import volunteerRequestRoutes from "./routes/volunteer-request.routes.js";
 import { authenticate, requireAdmin } from "./middleware/auth.middleware.js";
 
 const app = express();
@@ -14,6 +15,9 @@ app.use(express.json({ limit: "1mb" }));
 
 // Public routes
 app.use("/auth", authRoutes);
+
+// Volunteer request routes (auth handled inside router)
+app.use("/volunteer-requests", volunteerRequestRoutes);
 
 // Protected routes (admin only)
 app.use("/volunteers", authenticate, requireAdmin, volunteerRoutes);

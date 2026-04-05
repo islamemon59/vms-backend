@@ -41,3 +41,11 @@ export const requireAdmin = (req: Request, res: Response, next: NextFunction): v
   }
   next();
 };
+
+export const requireVolunteerOrAdmin = (req: Request, res: Response, next: NextFunction): void => {
+  if (!req.user || (req.user.role !== "volunteer" && req.user.role !== "admin")) {
+    res.status(403).json({ error: "Volunteer or admin access required" });
+    return;
+  }
+  next();
+};
